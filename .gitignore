@@ -22,6 +22,7 @@
 hs_err_pid*
 
 # custom
+build/
 bin/
 .settings
 .classpath
