@@ -14,6 +14,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import com.sun.net.httpserver.HttpServer;
 import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.HttpFileHandler;
+import de.sb.toolbox.net.RestJpaLifecycleProvider;
+import de.sb.toolbox.net.RestResponseCodeProvider;
 
 /**
  * This class is used within a Java-SE VM to deploy REST services.
@@ -30,7 +32,7 @@ public class ApplicationContainer {
 	 * @throws IOException if there is an I/O related problem
 	 */
 	static public void main (final String[] args) throws NumberFormatException, IOException {
-		final int servicePort = args.length == 0 ? 80 : Integer.parseInt(args[0]);
+		final int servicePort = args.length == 0 ? 8010 : Integer.parseInt(args[0]);
 		final URI serviceURI;
 		try {
 			serviceURI = new URI("http", null, InetAddress.getLocalHost().getCanonicalHostName(), servicePort, "/services", null, null);
@@ -46,7 +48,9 @@ public class ApplicationContainer {
 			.packages(ApplicationContainer.class.getPackage().toString())
 			.register(MoxyJsonFeature.class)	// edit "network.http.accept.default" in Firefox's "about:config"
 			.register(MoxyXmlFeature.class)		// to make "application/json" preferable to "application/xml"
-			.register(EntityFilteringFeature.class);
+			.register(EntityFilteringFeature.class)
+			.register(new RestJpaLifecycleProvider("messenger"))
+			.register(RestResponseCodeProvider.class);
 
 		final HttpServer container = JdkHttpServerFactory.createHttpServer(serviceURI, configuration);
 		final HttpFileHandler resourceHandler = HttpFileHandler.newInstance("/resources");
