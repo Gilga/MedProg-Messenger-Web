@@ -12,8 +12,7 @@ Messenger-JUnit-Tests: https://github.com/Gilga/MedProg-Messenger-Tests
 
 ## Project Setup
 
-Dependencies
-============
+### Dependencies
 - User-Libraries
   - java-util-1.1
     - ./java/sb-toolbox-1.1.x.jar
@@ -26,7 +25,6 @@ Dependencies
     - ./jpa/eclipse-link-2.5.x/eclipselink.jar
 
 
-Project Settings
-================
+### Project Settings
 - ensure Compiler Compliance Level 1.8+ (Properties->Java Compiler)
   on Eclipse IDE for Java Developers, version Luna+
