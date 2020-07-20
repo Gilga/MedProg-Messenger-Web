@@ -1,19 +1,24 @@
 package de.sb.messenger.rest;
 
+// -javaagent:"C:/Users/Mario/Desktop/Wissen/Komponentenbasierte Entwicklung/Projects/libs/eclipselink-2.6.4/eclipselink.jar"
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import org.glassfish.jersey.jdkhttp.JdkHttpServerFactory;
 import org.glassfish.jersey.message.filtering.EntityFilteringFeature;
 import org.glassfish.jersey.moxy.json.MoxyJsonFeature;
 import org.glassfish.jersey.moxy.xml.MoxyXmlFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import com.sun.net.httpserver.HttpServer;
+
 import de.sb.toolbox.Copyright;
 import de.sb.toolbox.net.HttpFileHandler;
+//import de.mariolink.base.RESTJPALifeCycleProvider;
 import de.sb.toolbox.net.RestJpaLifecycleProvider;
 import de.sb.toolbox.net.RestResponseCodeProvider;
 
@@ -44,25 +49,31 @@ public class ApplicationContainer {
 		// implementation and XML-based configuration. The Factory-Class used is Jersey-specific, while the HTTP server
 		// type used is Oracle/OpenJDK-specific. Other HTTP server types more suitable for production environments are
 		// available, such as Apache Tomcat, Grizzly, Simple, etc.
-		final ResourceConfig configuration = new ResourceConfig()
-			.packages(ApplicationContainer.class.getPackage().toString())
-			.register(MoxyJsonFeature.class)	// edit "network.http.accept.default" in Firefox's "about:config"
-			.register(MoxyXmlFeature.class)		// to make "application/json" preferable to "application/xml"
-			.register(EntityFilteringFeature.class)
-			.register(new RestJpaLifecycleProvider("messenger"))
-			.register(RestResponseCodeProvider.class);
 
-		final HttpServer container = JdkHttpServerFactory.createHttpServer(serviceURI, configuration);
-		final HttpFileHandler resourceHandler = HttpFileHandler.newInstance("/resources");
-		container.createContext(resourceHandler.getContextPath(), resourceHandler);
+		HttpServer container = null; // final
+
 		try {
+			final ResourceConfig configuration = new ResourceConfig()
+					.packages(ApplicationContainer.class.getPackage().toString())
+					.register(MoxyJsonFeature.class)	// edit "network.http.accept.default" in Firefox's "about:config"
+					.register(MoxyXmlFeature.class)		// to make "application/json" preferable to "application/xml"
+					.register(EntityFilteringFeature.class)
+					.register(new RestJpaLifecycleProvider("messenger")) //javax.persistence.EntityManager.class
+					.register(RestResponseCodeProvider.class);
+			
+			container = JdkHttpServerFactory.createHttpServer(serviceURI, configuration);
+			final HttpFileHandler resourceHandler = HttpFileHandler.newInstance("/"); ///resources
+			container.createContext(resourceHandler.getContextPath(), resourceHandler);
+			
 			System.out.format("HTTP container running on service address %s:%s, enter \"quit\" to stop.\n", serviceURI.getHost(), serviceURI.getPort());
 			System.out.format("Service path \"%s\" is configured for REST service access.\n", serviceURI.getPath());
 			System.out.format("Service path \"%s\" is configured for JAR resource access.\n", resourceHandler.getContextPath());
 			final BufferedReader charSource = new BufferedReader(new InputStreamReader(System.in));
 			while (!"quit".equals(charSource.readLine()));
+		//} catch(Error ex) {
+		//	System.out.format("Error.\n");
 		} finally {
-			container.stop(0);
+			if(container != null) container.stop(0);
 		}
 	}
 }
